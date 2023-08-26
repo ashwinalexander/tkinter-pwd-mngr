@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from random  import randint, choice, shuffle
 import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def gen_pwd():
@@ -32,26 +33,43 @@ window.title("Password Manager")
 # first configure the window
 window.config(padx=50, pady=50)
 
+
 def save_entry():
     val_website = var_website.get()
     val_email = var_email.get()
     val_pwd = var_password.get()
+    new_data = {
+        val_website: {
+            "email": val_email,
+            "password": val_pwd
+        }
+    }
 
     if len(val_website) == 0 or len(val_pwd) == 0:
         messagebox.showinfo(title="Oops", message="Please don't leave any fields empty")
-
     else:
-        is_okay = messagebox.askokcancel(title=val_website,
-                                     message=f"These are the details entered: \n Email:{val_email}\n Password:{val_pwd}\n Shall we go ahead and save? ")
-
-        if is_okay:
+        try:
             # using with means we don't have to worry about closing the file
-            with open("data.txt", "a") as data_file:
-                data_file.write(f"{val_website} | {val_email} | {val_pwd} \n")
+            # First try to read from the file we assume it exists at this point
+            with open("data.json", "r") as data_file:
+                # read old data
+                data = json.load(data_file)
+        except FileNotFoundError:
+            # our assumption was incorrect and the file did not exists so let's write to it
+            with open("data.json", "w") as data_file:
+                # write to json
+                json.dump(new_data, data_file, indent=4)
 
-            # finally delete the entries
-            txtWebsite.delete(0, 'end')
-            txtPassword.delete(0, 'end')
+        else:
+            # this is only triggered if everything within the try block is successful
+            data.update(new_data)
+            with open("data.json", "w") as data_file:
+                # write to json
+                json.dump(data, data_file, indent=4)
+
+        # finally delete the entries
+        txtWebsite.delete(0, 'end')
+        txtPassword.delete(0, 'end')
 
 
 # next configure the canvas

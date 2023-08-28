@@ -33,6 +33,28 @@ window.title("Password Manager")
 # first configure the window
 window.config(padx=50, pady=50)
 
+def search_db():
+    website_val = txtWebsite.get()
+    if len(website_val) == 0:
+        messagebox.showinfo(title="Oops", message="Which website are you searching for?")
+    else:
+        try:
+            with open("data.json", "r") as data_file:
+                # read old data
+                all_data = json.load(data_file)
+                web_credentials = all_data[website_val]
+                email = web_credentials["email"]
+                pwd = web_credentials["password"]
+
+                messagebox.showinfo(title=website_val, message=f"Email:{email}\nPassword:{pwd}\n")
+        except FileNotFoundError:
+            messagebox.showinfo(title="Error", message="No Data File Found")
+        except KeyError:
+            messagebox.showinfo(title="Error", message="No website found")
+
+
+
+
 
 def save_entry():
     val_website = var_website.get()
@@ -96,9 +118,9 @@ lblPassword.grid(row=3,column=0)
 # Entries
 
 var_website = StringVar()
-txtWebsite = Entry(width=52,justify="left", textvariable=var_website)
+txtWebsite = Entry(width=33, textvariable=var_website)
 txtWebsite.focus()
-txtWebsite.grid(row=1,column=1,  columnspan=2)
+txtWebsite.grid(row=1,column=1)
 
 var_email = StringVar()
 txtUsername = Entry(width=52,textvariable=var_email)
@@ -109,6 +131,9 @@ var_password = StringVar()
 txtPassword = Entry(width=33, textvariable=var_password)
 txtPassword.grid(row=3,column=1)
 
+# Search button
+btnSearch = Button(text="Search", command=search_db, bg="blue", fg="white", width=13)
+btnSearch.grid(row=1, column=2)
 
 # Generate Password button
 btnGen = Button(text="Generate Password", command=gen_pwd)
@@ -117,5 +142,7 @@ btnGen.grid(row=3, column=2)
 # Add button
 btnAdd = Button(text="Add", command= save_entry, width=44)
 btnAdd.grid(row=4, column=1, columnspan=2)
+
+
 
 window.mainloop()
